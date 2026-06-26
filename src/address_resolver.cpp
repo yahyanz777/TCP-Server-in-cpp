@@ -1,6 +1,6 @@
-#include "address_resolver.h"
-#include "address_resolution_error.h"
-#include "resolved_addresses.h"
+#include "address_resolver.hpp"
+#include <stdexcept>
+#include "resolved_addresses.hpp"
 #include <netdb.h>
 
 resolved_addresses address_resolver::resolve(const std::string& host,const std::string& service)const{
@@ -15,7 +15,7 @@ resolved_addresses address_resolver::resolve(const std::string& host,const std::
     int status = getaddrinfo(host.c_str(),service.c_str(),&metadata,&addresses);
 
     if(status != 0 ){
-        throw resolution_error(gai_strerror(status));
+        throw std::runtime_error(gai_strerror(status));
     }
        
     return resolved_addresses(addresses);

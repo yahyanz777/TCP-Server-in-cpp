@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "resolved_addresses.h"
+#include "resolved_addresses.hpp"
 
 struct addrinfo;
 

@@ -1,7 +1,7 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Iinclude
+CXXFLAGS = -std=c++11 -Wall -g -Iinclude
 SRCDIR = src
-SOURCES = $(SRCDIR)/main.cpp $(SRCDIR)/address_resolver.cpp $(SRCDIR)/resolved_addresses.cpp $(SRCDIR)/address_resolution_error.cpp
+SOURCES = $(wildcard $(SRCDIR)/*.cpp)
 OUTPUT = main
 
 all: $(OUTPUT)
