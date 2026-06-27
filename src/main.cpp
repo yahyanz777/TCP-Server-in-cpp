@@ -8,7 +8,10 @@
 
 int main(){
     address_resolver resolver;
-    resolved_addresses address = resolver.resolve("142.250.181.142","80");
+    resolved_addresses address = resolver.resolve("127.0.0.1","8080");
     socket_handler socket = socket_handler::create_socket(address.get());
-    socket_handler::bind_socket(socket,*address.get());
+    addrinfo* addr = address.get();
+    socket.bind_socket(*addr);
+    socket.socket_listen(5);
+    socket.socket_accept();
 }

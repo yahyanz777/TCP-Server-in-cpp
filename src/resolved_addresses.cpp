@@ -2,12 +2,31 @@
 
 resolved_addresses::resolved_addresses(addrinfo* addresses):addresses_(addresses){}
 
+resolved_addresses::resolved_addresses(resolved_addresses&& other) noexcept : addresses_(other.addresses_)
+{
+    other.addresses_ = nullptr;
+}
+
+resolved_addresses& resolved_addresses::operator=(resolved_addresses&& other) noexcept
+{
+    if (this != &other)
+    {
+        if (addresses_)
+            freeaddrinfo(addresses_);
+
+        addresses_ = other.addresses_;
+        other.addresses_ = nullptr;
+    }
+
+    return *this;
+}
+
 resolved_addresses::~resolved_addresses(){
     if(addresses_)
         freeaddrinfo(addresses_);
 }
 
-addrinfo* resolved_addresses::get() const{
+addrinfo* resolved_addresses::get() {
     return addresses_;
 }
 
