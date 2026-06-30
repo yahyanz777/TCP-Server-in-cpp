@@ -1,6 +1,7 @@
 #pragma once
 #include <sys/epoll.h>
 #include <connection.hpp>
+#include <vector>
 
 class epoll_handler
 {
@@ -14,11 +15,11 @@ public:
 
     ~epoll_handler();
 
-    void add (uint32_t events,connection* conn);
-    void modify(uint32_t events,connection* conn);
-    void remove (uint32_t events,connection* conn);
+    void add(uint32_t events, connection* conn);
+    void modify(uint32_t events, connection* conn);
+    void remove(connection* conn);
 
-    int wait (uint32_t events,connection* conn);
+    int wait(std::vector<epoll_event>& active_events, int timeout_ms = -1);
 
 
 private:

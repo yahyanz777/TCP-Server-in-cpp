@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <cstdio>
+#include <system_error>
 
 
 namespace
@@ -39,45 +40,42 @@ epoll_handler::~epoll_handler() {
     }
 }
 
-void epoll_handler::add (uint32_t events,connection* conn){
+void epoll_handler::add(uint32_t events, connection* conn){
     epoll_event event{};
-    event.events=events;
-    event.data.ptr=conn;
-    if(epoll_ctl(epfd_,EPOLL_CTL_ADD,conn->get_cfd(),&event)== -1){
-        perror("epoll_ctl : add");
-        delete conn;
+    event.events = events;
+    event.data.ptr = conn;
+    if(epoll_ctl(epfd_, EPOLL_CTL_ADD, conn->get_cfd(), &event) == -1){
+        throw make_epoll_error("epoll_ctl : add failed");
     }
 }
 
-void epoll_handler::modify(uint32_t events,connection*conn){
+void epoll_handler::modify(uint32_t events, connection* conn){
     epoll_event event{};
-    event.events=events;
-    event.data.ptr=conn;
-    if(epoll_ctl(epfd_,EPOLL_CTL_MOD,conn->get_cfd(),&event)== -1){
-        perror("epoll_ctl : mod");
-        delete conn;
-    }
-}
-void epoll_handler::remove(uint32_t events,connection*conn){
-    epoll_event event{};
-    event.events=events;
-    event.data.ptr=conn;
-    if(epoll_ctl(epfd_,EPOLL_CTL_DEL,conn->get_cfd(),&event)== -1){
-        perror("epoll_ctl : del");
-        delete conn;
+    event.events = events;
+    event.data.ptr = conn;
+    if(epoll_ctl(epfd_, EPOLL_CTL_MOD, conn->get_cfd(), &event) == -1){
+        throw make_epoll_error("epoll_ctl : mod failed");
     }
 }
 
-int epoll_handler::wait(uint32_t events,connection*conn){
-    epoll_event event{};
-    event.events=events;
-    event.data.ptr=conn;
-    int ready = epoll_wait(epfd_,&event,MAX_EVENTS,-1);
-    if(ready ==-1)
-        perror("epoll_wait");
-    
-        return ready;
-   
+void epoll_handler::remove(connection* conn){
+    if(epoll_ctl(epfd_, EPOLL_CTL_DEL, conn->get_cfd(), nullptr) == -1){
+        throw make_epoll_error("epoll_ctl : del failed");
+    }
+}
+
+int epoll_handler::wait(std::vector<epoll_event>& active_events, int timeout_ms){
+    active_events.resize(MAX_EVENTS);
+    int ready = epoll_wait(epfd_, active_events.data(), MAX_EVENTS, timeout_ms);
+    if(ready == -1) {
+        if (errno == EINTR) {
+            active_events.clear();
+            return 0;
+        }
+        throw make_epoll_error("epoll_wait failed");
+    }
+    active_events.resize(ready);
+    return ready;
 }
 
 
