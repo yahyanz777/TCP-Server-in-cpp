@@ -1,6 +1,7 @@
 #include "epoll_handler.hpp"
 #include <iostream>
 #include <unistd.h>
+#include <cstdio>
 
 
 namespace
@@ -38,9 +39,47 @@ epoll_handler::~epoll_handler() {
     }
 }
 
-int epoll_handler::add (int fd,struct epoll_event* events){
+void epoll_handler::add (uint32_t events,connection* conn){
     epoll_event event{};
-    int flag =epoll_ctl(epfd_,)
-
+    event.events=events;
+    event.data.ptr=conn;
+    if(epoll_ctl(epfd_,EPOLL_CTL_ADD,conn->get_cfd(),&event)== -1){
+        perror("epoll_ctl : add");
+        delete conn;
+    }
 }
+
+void epoll_handler::modify(uint32_t events,connection*conn){
+    epoll_event event{};
+    event.events=events;
+    event.data.ptr=conn;
+    if(epoll_ctl(epfd_,EPOLL_CTL_MOD,conn->get_cfd(),&event)== -1){
+        perror("epoll_ctl : mod");
+        delete conn;
+    }
+}
+void epoll_handler::remove(uint32_t events,connection*conn){
+    epoll_event event{};
+    event.events=events;
+    event.data.ptr=conn;
+    if(epoll_ctl(epfd_,EPOLL_CTL_DEL,conn->get_cfd(),&event)== -1){
+        perror("epoll_ctl : del");
+        delete conn;
+    }
+}
+
+int epoll_handler::wait(uint32_t events,connection*conn){
+    epoll_event event{};
+    event.events=events;
+    event.data.ptr=conn;
+    int ready = epoll_wait(epfd_,&event,MAX_EVENTS,-1);
+    if(ready ==-1)
+        perror("epoll_wait");
+    
+        return ready;
+   
+}
+
+
+
 

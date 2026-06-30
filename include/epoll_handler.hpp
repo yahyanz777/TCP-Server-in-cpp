@@ -1,5 +1,6 @@
 #pragma once
 #include <sys/epoll.h>
+#include <connection.hpp>
 
 class epoll_handler
 {
@@ -11,13 +12,13 @@ public:
     epoll_handler(epoll_handler &&other) noexcept;
     epoll_handler &operator=(epoll_handler &&other) noexcept;
 
-     ~epoll_handler();
+    ~epoll_handler();
 
-    int add (int fd,struct epoll_event* events);
-    int modify(int fd, struct epoll_event* events);
-    int remove (int fd,struct epoll_event* events);
+    void add (uint32_t events,connection* conn);
+    void modify(uint32_t events,connection* conn);
+    void remove (uint32_t events,connection* conn);
 
-    int wait (int epfd, struct epoll_event* events);
+    int wait (uint32_t events,connection* conn);
 
 
 private:
