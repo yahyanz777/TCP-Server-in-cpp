@@ -1,11 +1,11 @@
-# High-Performance TCP Chat Server
+# TCP Chat Server
 
-A high-performance TCP chat server and client written in C++20 to explore modern Linux network programming. The project focuses on building an efficient asynchronous server from scratch using low-level POSIX socket APIs.
+A TCP chat server and client written in **C++20** to explore modern Linux network programming. The project focuses on building an event-driven server from scratch using low-level POSIX socket APIs.
 
 ## Features
 
-- **Asynchronous, non-blocking I/O** using `O_NONBLOCK`.
-- **Edge-triggered `epoll`** for efficiently handling many concurrent connections.
+- **Non-blocking I/O** using `O_NONBLOCK`.
+- **Edge-triggered `epoll`** for event-driven I/O.
 - **Modern C++ design**
   - RAII wrappers for sockets and `epoll`
   - Move semantics for safe resource ownership
@@ -21,14 +21,14 @@ A high-performance TCP chat server and client written in C++20 to explore modern
 
 ## Project Structure
 
-```
+```text
 .
 ├── tcpserver.cpp              # Server entry point
 ├── src/
 │   ├── client.cpp             # Chat client
 │   ├── socket.cpp             # Socket wrapper
 │   ├── epoll_handler.cpp      # epoll wrapper
-│   └── address_resolver.cpp   # DNS/address resolution
+│   └── address_resolver.cpp   # Address resolution
 └── include/
 ```
 
@@ -56,4 +56,10 @@ make run-client
 ./client [host] [port]
 ```
 
-The server listens on `0.0.0.0:3000` by default, and the client connects to `127.0.0.1:3000`. After connecting, enter your name and start chatting. Use `/quit` to disconnect.
+The server listens on `0.0.0.0:3000` by default, and the client connects to `127.0.0.1:3000`. After connecting, enter your name and start chatting. Use `/quit` to disconnect gracefully.
+
+## Documentation
+
+A detailed document describing the implementation, design decisions, and networking concepts explored during this project is available here:
+
+- [Project Documentation](docs/TCP-server-in-cpp.pdf)
