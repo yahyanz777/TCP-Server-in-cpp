@@ -55,10 +55,16 @@ int main(int argc, char* argv[]) {
         std::thread receiver(receive_messages, std::ref(client_socket));
 
         std::string input;
-        while (running && std::getline(std::cin, input)) {
+        while (running && std::getline(std::cin, input)){
             if (input == "/quit") {
+                std::string message = name + " left the chat\n";
+                 client_socket.send_data(message);
                 running = false;
                 break;
+            }
+
+            if (input.empty() || input.find_first_not_of(" \t\r\n") == std::string::npos) {
+                continue;
             }
 
             std::string message = name + ": " + input + "\n";
@@ -66,6 +72,7 @@ int main(int argc, char* argv[]) {
         }
 
         running = false;
+        shutdown(client_socket.get_fd(), SHUT_RDWR);
 
         if (receiver.joinable()) {
             receiver.join();

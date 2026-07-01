@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <cstddef>
 #include <string>
-#include "udp_datagram.hpp"
+
 
 
 
@@ -38,14 +38,7 @@ public:
 
     std::size_t recv_data(void* msg, std::size_t size);
 
-    std::size_t send_data_to(const void* msg, std::size_t size, const sockaddr* address, socklen_t address_len);
-    std::size_t send_data_to(const void* msg, std::size_t size, const udp_datagram& datagram);
-    std::size_t send_data_to(const void* msg,std::size_t size,addrinfo* address);
-    
-    
-    
-    udp_datagram recv_data_from(void* msg, std::size_t size);
-    std::size_t recv_data_from(void* msg, std::size_t size, sockaddr* address, socklen_t* address_len);
+
 
     void set_nonblocking();
 
