@@ -8,7 +8,7 @@
 
 namespace
 {
-std::runtime_error make_socket_error(const char* operation)
+std::system_error make_socket_error(const char* operation)
 {
     return std::system_error(errno,std::generic_category(),operation);
 }
@@ -54,6 +54,7 @@ socket_handler socket_handler::create_socket(addrinfo* info)
     return socket_handler(fd);
 }
 
+
 void socket_handler::bind_socket(addrinfo& info){
     if (bind(fd_, info.ai_addr, info.ai_addrlen) == -1)
         throw make_socket_error("bind");
@@ -95,43 +96,22 @@ std::size_t socket_handler::send_data(const std::string& msg)
 
 std::size_t socket_handler::send_data(const void* msg, std::size_t size)
 {
-    const auto* buffer = static_cast<const char*>(msg);
-    std::size_t total_sent = 0;
-
-    while (total_sent < size)
+    ssize_t sent = send(fd_, msg, size, 0);
+    if (sent == -1)
     {
-        ssize_t sent = send(fd_, buffer + total_sent, size - total_sent, 0);
-        if (sent == -1)
-        {
-            if (errno == EINTR)
-                continue;
-
-            throw make_socket_error("send");
-        }
-
-        total_sent += static_cast<std::size_t>(sent);
+        throw make_socket_error("send");
     }
-
-    return total_sent;
+    return static_cast<std::size_t>(sent);
 }
 
 std::size_t socket_handler::recv_data(void* msg, std::size_t size)
 {
-    auto* buffer = static_cast<char*>(msg);
-
-    for (;;)
+    ssize_t rcvd = recv(fd_, msg, size, 0);
+    if (rcvd == -1)
     {
-        ssize_t rcvd = recv(fd_, buffer, size, 0);
-        if (rcvd == -1)
-        {
-            if (errno == EINTR)
-                continue;
-
-            throw make_socket_error("recv");
-        }
-
-        return static_cast<std::size_t>(rcvd);
+        throw make_socket_error("recv");
     }
+    return static_cast<std::size_t>(rcvd);
 }
 
 std::size_t socket_handler::send_data_to(const void* msg, std::size_t size, const sockaddr* address, socklen_t address_len)

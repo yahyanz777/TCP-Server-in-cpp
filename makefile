@@ -1,8 +1,8 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -Wall -g -Iinclude
+CXXFLAGS = -std=c++20 -Wall -g -Iinclude -pthread
 SRCDIR = src
 COMMON_SOURCES = $(filter-out $(SRCDIR)/server.cpp $(SRCDIR)/client.cpp,$(wildcard $(SRCDIR)/*.cpp))
-SERVER_SOURCES = $(SRCDIR)/server.cpp $(COMMON_SOURCES)
+SERVER_SOURCES = tcpserver.cpp $(COMMON_SOURCES)
 CLIENT_SOURCES = $(SRCDIR)/client.cpp $(COMMON_SOURCES)
 SERVER = server
 CLIENT = client

@@ -3,7 +3,8 @@
 #include "resolved_addresses.hpp"
 #include <netdb.h>
 
-resolved_addresses address_resolver::resolve(const std::string& host, const std::string& service, int socktype) const{
+namespace address_resolver{
+resolved_addresses resolve(const std::string& host, const std::string& service, int socktype) {
 
     addrinfo* addresses =nullptr;
     addrinfo metadata {};
@@ -20,6 +21,7 @@ resolved_addresses address_resolver::resolve(const std::string& host, const std:
        
     return resolved_addresses(addresses);
 
+}
 }
 
 

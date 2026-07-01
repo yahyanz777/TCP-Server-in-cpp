@@ -8,8 +8,7 @@ struct addrinfo;
 
  
 
-class address_resolver
+namespace address_resolver
 {
-    public: 
-    resolved_addresses resolve(const std::string& host, const std::string& service, int socktype = SOCK_DGRAM) const;
-};
+    resolved_addresses resolve(const std::string& host, const std::string& service, int socktype = SOCK_STREAM);
+}

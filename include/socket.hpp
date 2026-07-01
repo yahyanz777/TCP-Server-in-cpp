@@ -1,4 +1,6 @@
 #pragma once
+
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include "resolved_addresses.hpp"
@@ -26,6 +28,10 @@ public:
     void socket_listen(int backlog);
     socket_handler socket_accept();
 
+    int get_fd(){
+        return fd_;
+    }
+
     std::size_t send_data(const char* msg);
     std::size_t send_data(const std::string& msg);
     std::size_t send_data(const void* msg, std::size_t size);
@@ -41,7 +47,7 @@ public:
     udp_datagram recv_data_from(void* msg, std::size_t size);
     std::size_t recv_data_from(void* msg, std::size_t size, sockaddr* address, socklen_t* address_len);
 
-    void socket_handler::set_nonblocking();
+    void set_nonblocking();
 
 private:
 

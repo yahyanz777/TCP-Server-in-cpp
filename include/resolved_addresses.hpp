@@ -1,10 +1,19 @@
 #pragma once
-
-#include<netdb.h>
-#include <string>
-#include <arpa/inet.h>
-#include <vector>
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
 #include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#endif
+
+#include <string>
+#include <vector>
+
+#ifdef _WIN32
+using sa_family_t = unsigned short;
+#endif
 class resolved_addresses{
     public: 
         explicit resolved_addresses(addrinfo* addresses);

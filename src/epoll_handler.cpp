@@ -7,7 +7,7 @@
 
 namespace
 {
-std::runtime_error make_epoll_error(const char* operation)
+std::system_error make_epoll_error(const char* operation)
 {
     return std::system_error(errno,std::generic_category(),operation);
 }
@@ -64,6 +64,20 @@ void epoll_handler::remove(connection* conn){
     }
 }
 
+bool epoll_handler::handle_read_error(const std::system_error& e, connection* conn){
+    int err = e.code().value();
+    if (err == EAGAIN || err == EWOULDBLOCK) {
+        return true; // Stop reading (non-blocking buffer empty)
+    }
+    if (err == EINTR) {
+        return false; // Retry reading (interrupted)
+    }
+    // Serious error: clean up and stop
+    remove(conn);
+    delete conn;
+    return true;
+}
+
 int epoll_handler::wait(std::vector<epoll_event>& active_events, int timeout_ms){
     active_events.resize(MAX_EVENTS);
     int ready = epoll_wait(epfd_, active_events.data(), MAX_EVENTS, timeout_ms);
@@ -77,7 +91,3 @@ int epoll_handler::wait(std::vector<epoll_event>& active_events, int timeout_ms)
     active_events.resize(ready);
     return ready;
 }
-
-
-
-
