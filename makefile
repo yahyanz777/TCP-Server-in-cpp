@@ -1,18 +1,33 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -g -Iinclude
+CXXFLAGS = -std=c++20 -Wall -g -Iinclude
 SRCDIR = src
-SOURCES = $(wildcard $(SRCDIR)/*.cpp)
-OUTPUT = main
+COMMON_SOURCES = $(filter-out $(SRCDIR)/server.cpp $(SRCDIR)/client.cpp,$(wildcard $(SRCDIR)/*.cpp))
+SERVER_SOURCES = $(SRCDIR)/server.cpp $(COMMON_SOURCES)
+CLIENT_SOURCES = $(SRCDIR)/client.cpp $(COMMON_SOURCES)
+SERVER = server
+CLIENT = client
 
-all: $(OUTPUT)
+all: $(SERVER) $(CLIENT)
 
-$(OUTPUT): $(SOURCES)
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(OUTPUT)
+$(SERVER): $(SERVER_SOURCES)
+	$(CXX) $(CXXFLAGS) $(SERVER_SOURCES) -o $(SERVER)
+	chmod +x $(SERVER)
 
-run: $(OUTPUT)
-	./$(OUTPUT)
+$(CLIENT): $(CLIENT_SOURCES)
+	$(CXX) $(CXXFLAGS) $(CLIENT_SOURCES) -o $(CLIENT)
+	chmod +x $(CLIENT)
+
+run-server: $(SERVER)
+	chmod +x $(SERVER)
+	./$(SERVER)
+
+run-client: $(CLIENT)
+	chmod +x $(CLIENT)
+	./$(CLIENT)
+
+run: run-server
 
 clean:
-	rm -f $(OUTPUT)
+	rm -f $(SERVER) $(CLIENT)
 
-.PHONY: all run clean
+.PHONY: all run run-server run-client clean

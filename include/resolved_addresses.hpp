@@ -17,10 +17,11 @@ class resolved_addresses{
 
         addrinfo* get() ;
         std::string IP();
+        static uint16_t Port(const sockaddr* addr);
+        static std::string IP(const sockaddr* addr);
         std::vector<std::string> IPs();
 
         
     private:
         addrinfo* addresses_;
-        std::string IP(addrinfo* addr);
 };

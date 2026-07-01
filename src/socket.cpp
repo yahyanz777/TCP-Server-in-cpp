@@ -4,12 +4,13 @@
 #include <stdexcept>
 #include <cstring>
 #include <string>
+#include <fcntl.h>
 
 namespace
 {
 std::runtime_error make_socket_error(const char* operation)
 {
-    return std::runtime_error(std::string(operation) + ": " + std::strerror(errno));
+    return std::system_error(errno,std::generic_category(),operation);
 }
 }
 
@@ -117,11 +118,10 @@ std::size_t socket_handler::send_data(const void* msg, std::size_t size)
 std::size_t socket_handler::recv_data(void* msg, std::size_t size)
 {
     auto* buffer = static_cast<char*>(msg);
-    std::size_t total_recv = 0;
 
-    while (total_recv < size)
+    for (;;)
     {
-        ssize_t rcvd = recv(fd_, buffer + total_recv, size - total_recv, 0);
+        ssize_t rcvd = recv(fd_, buffer, size, 0);
         if (rcvd == -1)
         {
             if (errno == EINTR)
@@ -130,30 +130,72 @@ std::size_t socket_handler::recv_data(void* msg, std::size_t size)
             throw make_socket_error("recv");
         }
 
-        if (rcvd == 0)
-            break;
-
-        total_recv += static_cast<std::size_t>(rcvd);
+        return static_cast<std::size_t>(rcvd);
     }
-
-    return total_recv;
 }
 
-std::size_t socket_handler::send_data_to(const void* msg, std::size_t size, addrinfo& addresses)
+std::size_t socket_handler::send_data_to(const void* msg, std::size_t size, const sockaddr* address, socklen_t address_len)
 {
-    ssize_t sent = sendto(fd_, msg, size, 0, addresses.ai_addr, addresses.ai_addrlen);
+    ssize_t sent = sendto(fd_, msg, size, 0, address, address_len);
     if (sent == -1)
         throw make_socket_error("sendto");
 
     return static_cast<std::size_t>(sent);
 }
 
-std::size_t socket_handler::recv_data_from(void* msg,std::size_t size){
-    sockaddr_storage client_address {};
-    socklen_t client_address_len = sizeof(client_address);
-    ssize_t rcvd = recvfrom(fd_, msg, size, 0, reinterpret_cast<sockaddr*>(&client_address), &client_address_len);
+std::size_t socket_handler::send_data_to(const void* msg, std::size_t size, const udp_datagram& datagram)
+{
+    return send_data_to(
+        msg,
+        size,
+        reinterpret_cast<const sockaddr*>(datagram.sender.address()),
+        datagram.sender.length());
+}
+
+std::size_t socket_handler::send_data_to(const void* msg, std::size_t size, addrinfo* address)
+{
+    if (address == nullptr)
+        throw std::invalid_argument("send_data_to: null addrinfo");
+
+    return send_data_to(msg, size, address->ai_addr, address->ai_addrlen);
+}
+
+udp_datagram socket_handler::recv_data_from(void* msg, std::size_t size)
+{
+    sockaddr_storage sender{};
+    socklen_t length = sizeof(sender);
+
+    ssize_t rcvd = recvfrom(
+        fd_,
+        msg,
+        size,
+        0,
+        reinterpret_cast<sockaddr*>(&sender),
+        &length);
+
+    if (rcvd == -1)
+        throw make_socket_error("recvfrom");
+
+    auto* bytes = static_cast<std::byte*>(msg);
+    return udp_datagram(
+        std::vector<std::byte>(bytes, bytes + rcvd),
+        endpoint(std::move(sender), length));
+}
+
+std::size_t socket_handler::recv_data_from(void* msg, std::size_t size, sockaddr* address, socklen_t* address_len)
+{
+    ssize_t rcvd = recvfrom(fd_, msg, size, 0, address, address_len);
     if (rcvd == -1)
         throw make_socket_error("recvfrom");
 
     return static_cast<std::size_t>(rcvd);
+}
+
+
+void socket_handler::set_nonblocking(){
+    int flags=fcntl(fd_,F_GETFL,0);
+    if(flags ==-1)
+    throw make_socket_error("fcntl F_GETFL");
+    if(fcntl(fd_,F_SETFL,flags | O_NONBLOCK) == -1 )
+    throw make_socket_error("fcntl F_SETFL");
 }

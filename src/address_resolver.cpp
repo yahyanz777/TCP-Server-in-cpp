@@ -3,13 +3,13 @@
 #include "resolved_addresses.hpp"
 #include <netdb.h>
 
-resolved_addresses address_resolver::resolve(const std::string& host,const std::string& service)const{
+resolved_addresses address_resolver::resolve(const std::string& host, const std::string& service, int socktype) const{
 
     addrinfo* addresses =nullptr;
     addrinfo metadata {};
 
     metadata.ai_flags=AI_PASSIVE;
-    metadata.ai_socktype=SOCK_STREAM;
+    metadata.ai_socktype=socktype;
     metadata.ai_family=AF_UNSPEC;
 
     int status = getaddrinfo(host.c_str(),service.c_str(),&metadata,&addresses);
