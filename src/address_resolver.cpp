@@ -25,4 +25,3 @@ resolved_addresses resolve(const std::string& host, const std::string& service, 
 }
 
 
-//getaddrinfo (ip,port,hints<metadata>,result_addr)

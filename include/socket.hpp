@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include "resolved_addresses.hpp"
 #include <stdexcept>
-#include <cstddef>//byte view size_t
+#include <cstddef>
 #include <string>
 #include "udp_datagram.hpp"
 
