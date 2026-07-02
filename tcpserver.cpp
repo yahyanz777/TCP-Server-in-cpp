@@ -10,12 +10,12 @@
 #include <vector>
 
 int main(int argc, char* argv[]) {
-    
+
     const std::string host = (argc > 1) ? argv[1] : "0.0.0.0";
     const std::string port = (argc > 2) ? argv[2] : "3000";
 
     try {
-        auto address = address_resolver::resolve(host, port);
+        auto address = address_resolver::resolve("", port);
 
         socket_handler listener_socket = socket_handler::create_socket(address.get());
         listener_socket.bind_socket(*address.get());

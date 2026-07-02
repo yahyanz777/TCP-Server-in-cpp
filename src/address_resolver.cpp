@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include "resolved_addresses.hpp"
 #include <netdb.h>
+#include <string>
 
 namespace address_resolver{
 resolved_addresses resolve(const std::string& host, const std::string& service, int socktype) {
@@ -13,7 +14,7 @@ resolved_addresses resolve(const std::string& host, const std::string& service, 
     metadata.ai_socktype=socktype;
     metadata.ai_family=AF_UNSPEC;
 
-    int status = getaddrinfo(host.c_str(),service.c_str(),&metadata,&addresses);
+    int status = getaddrinfo(host.empty()?nullptr:host.c_str(),service.c_str(),&metadata,&addresses);
 
     if(status != 0 ){
         throw std::runtime_error(gai_strerror(status));
